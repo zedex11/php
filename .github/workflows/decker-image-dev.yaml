@@ -9,6 +9,7 @@ name: Node Project `my-app` CI on ECR
 jobs:
   deploy:
     name: Deploy
+    environment: dev
     runs-on: ubuntu-latest
 
     steps:
