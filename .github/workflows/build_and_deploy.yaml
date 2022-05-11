@@ -49,7 +49,7 @@ jobs:
         ref: dev
     
     - name: check
-      id: check path
+      id: check_path
       run: |
         pwd 
         ls -a
