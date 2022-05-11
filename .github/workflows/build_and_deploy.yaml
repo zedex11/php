@@ -62,6 +62,7 @@ jobs:
       run: |
         pwd 
         ls -a
+        cd ecs/
         terraform init \
             -backend-config "bucket=dev-infra-test-1" \
             -backend-config "region=us-east-1" \
