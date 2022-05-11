@@ -45,7 +45,6 @@ jobs:
       with:
         repository: zedex11/demo_infra
         token: ${{ secrets.GH_PAT }} # `GH_PAT` is a secret that contains your PAT
-        path: ecs
         ref: dev
     
     - name: check
