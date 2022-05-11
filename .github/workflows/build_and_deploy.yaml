@@ -40,6 +40,13 @@ jobs:
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
     
+
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./ecs
+    steps:
     - name: Checkout Infra repo
       uses: actions/checkout@v3
       with:
@@ -52,7 +59,7 @@ jobs:
       run: |
         pwd 
         ls -a
-        cd ecs/
+        #cd ecs/
 
     - uses: hashicorp/setup-terraform@v2
 
@@ -61,7 +68,7 @@ jobs:
       run: |
         pwd 
         ls -a
-        cd ecs/
+        #cd ecs/
         ls -a
         terraform init \
             -backend-config "bucket=dev-infra-test-1" \
