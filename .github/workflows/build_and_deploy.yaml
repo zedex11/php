@@ -63,6 +63,7 @@ jobs:
         pwd 
         ls -a
         cd ecs/
+        ls -a
         terraform init \
             -backend-config "bucket=dev-infra-test-1" \
             -backend-config "region=us-east-1" \
@@ -70,5 +71,8 @@ jobs:
 
     - name: Terraform Plan
       id: plan
-      run: terraform plan
+      run: | 
+        pwd 
+        ls -a
+        terraform plan
       continue-on-error: true
