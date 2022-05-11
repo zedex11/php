@@ -5,7 +5,7 @@ name: Simple app CI/CD workflow
 
 jobs:
   build_and_deploy_to_Dev:
-    name: Build and push Docker Image to Dev
+    name: build_to_Dev
     if: github.ref == 'refs/heads/dev'
     environment: dev
     runs-on: ubuntu-latest
@@ -32,7 +32,7 @@ jobs:
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         ECR_REPOSITORY: ${{ secrets.REPO_NAME }}
-        IMAGE_TAG: ${{ github.sha }}-dev
+        IMAGE_TAG: "111" #${{ github.sha }}-dev
       run: |
         # Build a docker container and push it to ECR 
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
@@ -61,22 +61,12 @@ jobs:
         token: ${{ secrets.GH_PAT }} # `GH_PAT` is a secret that contains your PAT
         ref: dev
     
-    - name: check
-      id: check_path
-      run: |
-        pwd 
-        ls -a
-        #cd ecs/
 
     - uses: hashicorp/setup-terraform@v2
 
     - name: Terraform Init
       id: init
       run: |
-        pwd 
-        ls -a
-        #cd ecs/
-        ls -a
         terraform init \
             -backend-config "bucket=dev-infra-test-1" \
             -backend-config "region=us-east-1" \
@@ -85,7 +75,5 @@ jobs:
     - name: Terraform Plan
       id: plan
       run: | 
-        pwd 
-        ls -a
         terraform plan
       continue-on-error: true
