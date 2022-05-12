@@ -27,20 +27,28 @@ jobs:
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
 
+    - name: Set image TAG
+      id: generate_tag
+      run: echo ::set-output name=IMAGE_TAG::$(echo `cat meta.json | jq .version`)-${GITHUB_RUN_NUMBER}
+   
     - name: Build, tag, and push the image to Amazon ECR
       id: build-image
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         ECR_REPOSITORY: ${{ secrets.REPO_NAME }}
-        IMAGE_TAG: "111" #${{ github.sha }}-dev
+        # IMAGE_TAG: $GITHUB_RUN_NUMBER
       run: |
         # Build a docker container and push it to ECR 
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:${{ steps.generate_tag.outputs.IMAGE_TAG }} .
         echo "Pushing image to ECR..."
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:${{ steps.generate_tag.outputs.IMAGE_TAG }}
+        echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:${{ steps.generate_tag.outputs.IMAGE_TAG }}"
+
+    outputs:
+      IMAGE_TAG: ${{ steps.generate_tag.outputs.IMAGE_TAG }}
+
     
-    
+
   deploy:
     needs: build
     name: deploy_to_Dev
@@ -78,10 +86,10 @@ jobs:
       id: plan
       run: | 
         terraform plan
-      continue-on-error: true
+
     
     - name: Terraform Apply
       id: apply
       run: | 
-        terraform apply -auto-approve
-      continue-on-error: true
+        terraform apply -var image_version=${{ needs.build.outputs.IMAGE_TAG }} -auto-approve
+
