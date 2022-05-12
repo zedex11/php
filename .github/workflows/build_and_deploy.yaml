@@ -4,7 +4,7 @@ on: [push, pull_request, workflow_dispatch]
 name: Simple app CI/CD workflow
 
 jobs:
-  build_and_deploy_to_Dev:
+  build:
     name: build_to_Dev
     if: github.ref == 'refs/heads/dev'
     environment: dev
@@ -40,8 +40,10 @@ jobs:
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
     
-
+    
   deploy:
+    needs: build
+    name: deploy_to_Dev
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -76,4 +78,10 @@ jobs:
       id: plan
       run: | 
         terraform plan
+      continue-on-error: true
+    
+    - name: Terraform Apply
+      id: apply
+      run: | 
+        terraform apply -auto-approve
       continue-on-error: true
