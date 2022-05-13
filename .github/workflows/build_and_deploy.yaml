@@ -92,5 +92,5 @@ jobs:
     - name: Terraform Apply
       id: apply
       run: | 
-        terraform apply -var env=${{ secrets.ENV }} -var image_version=${{ needs.build.outputs.IMAGE_TAG }} -auto-approve
+        terraform apply -var env_name=${{ secrets.ENV }} -var image_version=${{ needs.build.outputs.IMAGE_TAG }} -auto-approve
 
