@@ -4,7 +4,7 @@ on: [push, pull_request, workflow_dispatch]
 name: Simple app CI/CD workflow
 
 jobs:
-  build_to_dev:
+  build:
     name: build_to_Dev
     if: github.ref == 'refs/heads/dev'
     environment: dev
