@@ -100,7 +100,7 @@ jobs:
         terraform apply -var env_name=${{ secrets.ENV }} -var image_version=${{ needs.build.outputs.IMAGE_TAG }} -auto-approve
 
 
- deploy_to_prod:
+  deploy_to_prod:
     if: github.ref == 'refs/heads/master'
     needs: [build, deploy_to_Dev]
     name: deploy_to_Prod
