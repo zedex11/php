@@ -9,7 +9,7 @@
 
 <?php
 echo '<p style="color: gold">
-      This is AWS ECS container with PHP App!!!!!!!!!!!!!!</p>';
+      This is AWS ECS container with PHP Appppp!!!!!!!!!!!!!!</p>';
 echo '<br>Server IP:'.$_SERVER['SERVER_ADDR'];
 ?>
 <br>
