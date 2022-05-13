@@ -2,12 +2,18 @@ on: [push, pull_request, workflow_dispatch]
 
 
 name: Simple app CI/CD workflow
+if: github.ref == 'refs/heads/dev'
+env:
+  E: dev
+if: github.ref == 'refs/heads/master'
+env:
+  E: prod
 
 jobs:
   build:
     name: build
-    if: github.ref == 'refs/heads/dev'
-    environment: dev
+    
+    environment: $E
     runs-on: ubuntu-latest
 
     steps:
@@ -52,7 +58,7 @@ jobs:
   deploy_to_dev:
     needs: build
     name: deploy_to_Dev
-    environment: dev
+    environment: $E
     runs-on: ubuntu-latest
     defaults:
       run:
