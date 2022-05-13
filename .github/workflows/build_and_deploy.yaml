@@ -1,26 +1,25 @@
-on: [push, pull_request, workflow_dispatch]
-
+on: [push, workflow_dispatch]
 
 name: Simple app CI/CD workflow
-if: github.ref == 'refs/heads/dev'
-env:
-  E: dev
-if: github.ref == 'refs/heads/master'
-env:
-  E: prod
 
 jobs:
   build:
     name: build
-    
-    environment: $E
+    environment: dev
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout
+    - name: Checkout dev
+      if: github.ref == 'refs/heads/dev'
       uses: actions/checkout@v3
       with:
-          ref: ${{ secrets.BRANCH }}
+          ref: dev
+
+    - name: Checkout master
+      if: github.ref == 'refs/heads/master'
+      uses: actions/checkout@v3
+      with:
+          ref: master 
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
@@ -41,7 +40,7 @@ jobs:
       id: build-image
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: ${{ secrets.ENV }}-${{ secrets.REPO_NAME }}
+        ECR_REPOSITORY: ${{ secrets.REPO_NAME }}
         IMAGE_TAG: ${{ steps.generate_tag.outputs.IMAGE_TAG }}
       run: |
         # Build a docker container and push it to ECR 
@@ -58,7 +57,7 @@ jobs:
   deploy_to_dev:
     needs: build
     name: deploy_to_Dev
-    environment: $E
+    environment: dev
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -99,4 +98,52 @@ jobs:
       id: apply
       run: | 
         terraform apply -var env_name=${{ secrets.ENV }} -var image_version=${{ needs.build.outputs.IMAGE_TAG }} -auto-approve
+
+
+ deploy_to_prod:
+    if: github.ref == 'refs/heads/master'
+    needs: [build, deploy_to_Dev]
+    name: deploy_to_Prod
+    environment: prod
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./ecs
+    steps:
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+
+    - name: Checkout Infra repo
+      uses: actions/checkout@v3
+      with:
+        repository: zedex11/demo_infra
+        token: ${{ secrets.GH_PAT }} # `GH_PAT` is a secret that contains your PAT
+        ref: ${{ secrets.BRANCH }}
+    
+
+    - uses: hashicorp/setup-terraform@v2
+
+    - name: Terraform Init
+      id: init
+      run: |
+        terraform init \
+            -backend-config "bucket=dev-infra-test-1" \
+            -backend-config "region=us-east-1" \
+            -backend-config "key=tfstate/ecs/cluster/dev/terraform.tfstate"
+
+    - name: Terraform Plan
+      id: plan
+      run: | 
+        terraform plan
+
+    
+    - name: Terraform Apply
+      id: apply
+      run: | 
+        terraform apply -var env_name=${{ secrets.ENV }} -var image_version=${{ needs.build.outputs.IMAGE_TAG }} -auto-approve
+
 
