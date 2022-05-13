@@ -29,7 +29,7 @@ jobs:
 
     - name: Set image TAG
       id: generate_tag
-      run: echo ::set-output name=IMAGE_TAG::$(echo `cat meta.json | jq .version`)-${GITHUB_RUN_NUMBER}
+      run: echo ::set-output name=IMAGE_TAG::$(echo `cat meta.json | jq -r .version`)-${GITHUB_RUN_NUMBER}
    
     - name: Build, tag, and push the image to Amazon ECR
       id: build-image
