@@ -9,11 +9,11 @@
 
 <?php
 echo '<p style="color: gold">
-      This is AWS ECS container with PHP App From Egor!!!!!!!!!!!!!!</p>';
+      This is AWS ECS container with PHP App From Egor and Sergey!!!!!!!!!!!!!!</p>';
 echo '<br>Server IP:'.$_SERVER['SERVER_ADDR'];
 ?>
 <br>
-Version 1.3.2
+Version 1.3.3
 <font color="red"><h1>Hello From Minsk!</h1></font>      
 </center>
 </body>
